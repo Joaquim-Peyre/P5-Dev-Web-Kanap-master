@@ -1,0 +1,39 @@
+function ajouterAuPanier ()
+{
+ const btnPanier = document.getElementById('addToCart')
+
+ btnPanier.addEventListener('click', function() {
+     choiceProductQuantity = document.getElementById("quantity").valueAsNumber
+     choiceProductColor = document.getElementById("colors").value
+
+
+    if (1<= choiceProductQuantity && choiceProductQuantity <=100 && choiceProductColor != '') {
+
+        const newProduct = {
+            id: kanapId,
+            color: choiceProductColor,
+            quantity: choiceProductQuantity
+        }
+
+        let monPanier = JSON.parse(localStorage.getItem('monPanier'))
+
+        if(monPanier) {
+            const sameArticle = monPanier.find(p => p.id == kanapId && p.color == choiceProductColor)
+
+            if(sameArticle) {
+                sameArticle.quantity = sameArticle.quantity + choiceProductQuantity
+            } else {
+                monPanier.push(newProduct)
+            }
+        } else {
+            monPanier = []
+            monPanier.push(newProduct)
+        }
+        
+        localStorage.setItem('panier', JSON.stringify(monPanier));
+    
+    } else {
+        alert('Veuillez choisir une quantité entre 1 et 100 et une couleur !')
+    }  
+ })
+}

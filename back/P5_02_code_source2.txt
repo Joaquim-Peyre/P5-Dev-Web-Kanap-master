@@ -1,0 +1,12 @@
+const productColors = document.getElementById('colors')
+productColors.innerHTML = kanap.colors
+ function buildColorsHTML (colorlList){
+        let ColorsHTML =""
+        for(let i = 0; 1 < colorlList.length; i++) {
+            ColorsHTML = ColorsHTML + `<option value="${colorlList[i]}">${colorlList[i]}</option>`
+        }
+    }
+
+        console.log(colorlList)
+        
+    buildColorsHTML(kanap.colors)
