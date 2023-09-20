@@ -42,8 +42,7 @@ async function main() {
 function displayCart(completedCart) {
     const cartContainer = document.getElementById('cd');
 
-    // Clear previous content in the cart container
-    cartContainer.innerHTML = 'cart';
+   
 
     // Iterate over each product in the completed cart
     for (let i = 0; i < completedCart.length; i++) {
@@ -108,5 +107,158 @@ function displayCart(completedCart) {
    console.log(completedCart) 
 }
 
+//Instauration formulaire avec regex
+function setupFormValidation() {
+    // Création des expressions régulières
+    
+    // Regular expressions
+    const charRegExp = /^[a-zA-Z ,.'-]+$/;
+    const addressRegExp = /^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+$/;
+    const emailRegExp = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
+
+
+    
+    const form = document.querySelector(".cart__order__form");
+
+    
+
+    // Ecoute des modifications des champs du formulaire
+    form.firstName.addEventListener('change', function() {
+        validateInput(this, charRegExp);
+    });
+
+    form.lastName.addEventListener('change', function() {
+        validateInput(this, charRegExp);
+    });
+
+    form.address.addEventListener('change', function() {
+        validateInput(this, addressRegExp);
+    });
+
+    form.city.addEventListener('change', function() {
+        validateInput(this, charRegExp);
+    });
+
+    form.email.addEventListener('change', function() {
+        validateInput(this, emailRegExp);
+    });
+
+    // Validation d'un champ avec l'expression régulière donnée
+    const validateInput = function(inputElement, regex) {
+        const errorMsgElement = inputElement.nextElementSibling;
+
+        if (regex.test(inputElement.value)) {
+            errorMsgElement.innerHTML = '';
+        } else {
+            errorMsgElement.innerHTML = 'Veuillez renseigner ce champ correctement.';
+        }
+    };
+}
+
+// Appel de la fonction pour la configuration de la validation du formulaire
+setupFormValidation();
+
 main()
+
+const prenom = document.getElementById("firstName");
+const nom = document.getElementById("lastName");
+const ville = document.getElementById("city");
+const adresse = document.getElementById("address");
+const mail = document.getElementById("email");
+
+// email
+const emailErrorMsg = document.getElementById("emailErrorMsg");
+function validateEmail(mail) {
+  const regexMail =
+    /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (regexMail.test(mail) == false) {
+    return false;
+  } else {
+    emailErrorMsg.innerHTML = null;
+    return true;
+  }
+}
+//  accepted characters by RegEx
+
+const regexName = /^[a-z][a-z '-.,]{1,31}$|^$/i;
+
+// first name
+const firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
+function validateFirstName(prenom) {
+  if (regexName.test(prenom) == false) {
+    return false;
+  } else {
+    firstNameErrorMsg.innerHTML = null;
+    return true;
+  }
+}
+
+// last name
+const lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
+function validateLastName(nom) {
+  if (regexName.test(nom) == false) {
+    return false;
+  } else {
+    lastNameErrorMsg.innerHTML = null;
+    return true;
+  }
+}
+
+// city
+const cityErrorMsg = document.getElementById("cityErrorMsg");
+function validateCity(ville) {
+  if (regexName.test(ville) == false) {
+    return false;
+  } else {
+    cityErrorMsg.innerHTML = null;
+    return true;
+  }
+
+
+  // adress
+const adressErrorMsg = document.getElementById("adressErrorMsg");
+function validateAdress(adresse) {
+  if (regexName.test(adresse) == false) {
+    return false;
+  } else {
+    adressErrorMsg.innerHTML = null;
+    return true;
+  }
+}
+// Génère un numéro aléatoire à 8 chiffres
+function generateRandomNumber() {
+  return Math.floor(Math.random() * 100000000);
+}
+
+// Récupère les informations du panier depuis le stockage local
+function getCartItems() {
+  const panier = JSON.parse(localStorage.getItem('panier')) || [];
+  return panier;
+}
+
+// Calcule le prix total du panier
+function calculateTotalPrice(cartItems) {
+  let totalPrice = 0;
+  for (const item of cartItems) {
+      totalPrice += item.individualAmount;
+  }
+  return totalPrice;
+}
+
+
+
+async function main() {
+  const allKanap = await getKanapList();
+  const completedCart = completeCart(allKanap);
+
+  // Stockez le panier dans le stockage local
+  localStorage.setItem('completedCart', JSON.stringify(completedCart));
+
+  // Redirigez l'utilisateur vers la page de confirmation
+  window.location.href = 'confirmation.html';
+}
+
+
+}
+
 
