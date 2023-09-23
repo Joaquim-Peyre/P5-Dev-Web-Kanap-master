@@ -66,6 +66,19 @@ function displayCart(completedCart) {
         productImage.style.width = '150px';
         productImage.style.height = '150px';
 
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Add';
+        addButton.classList.add('add-button');
+
+        // Add a click event listener to the "Add" button
+        addButton.addEventListener('click', () => {
+            // Add the product back to the cart and re-render the display
+            const newProduct = { ...product }; // Create a copy of the product
+            completedCart.push(newProduct);
+            
+        });
+
+
         // Create a delete button for the product
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
@@ -86,6 +99,7 @@ function displayCart(completedCart) {
         productContainer.appendChild(productImage);
         productContainer.appendChild(productName);
         productContainer.appendChild(productPrice);
+        productContainer.appendChild(addButton); // Add the "Add" button
         productContainer.appendChild(deleteButton);
         cartContainer.appendChild(productContainer);
         
