@@ -1,131 +1,148 @@
 async function getKanapList() {
 
-    return fetch('http://localhost:3000/api/products')
-        .then(function (response) {
-            if (response.ok) {
-                return response.json()
-            }
-        })
-        .then(kanapList => {
-            return kanapList
-        })
+  return fetch('http://localhost:3000/api/products')
+      .then(function (response) {
+          if (response.ok) {
+              return response.json()
+          }
+      })
+      .then(kanapList => {
+          return kanapList
+      })
 }
 
 function completeCart(allKanap){
-    const panier = JSON.parse(localStorage.getItem('panier'))
-    
-    for(const product of panier) {
-        const correspondingProduct = allKanap.find(k => k._id == product.id)
-        product.name = correspondingProduct.name
-        product.price = correspondingProduct.price
-        product.imageUrl = correspondingProduct.imageUrl
+  const panier = JSON.parse(localStorage.getItem('panier'))
+  
+  for(const product of panier) {
+      const correspondingProduct = allKanap.find(k => k._id == product.id)
+      product.name = correspondingProduct.name
+      product.price = correspondingProduct.price
+      product.imageUrl = correspondingProduct.imageUrl
 
-        product.individualAmount = product.quantity * product.price;
-    }
+      product.individualAmount = product.quantity * product.price;
+  }
 
-    
-    return panier
+  
+  return panier
 }
 
 
-    
 
-
-async function main() {
-    const allKanap = await getKanapList();
-    const completedCart = completeCart(allKanap);
-    displayCart(completedCart); // Call the displayCart function with the completedCart array
-}
-
-// ... (rest of your code)
 
 function displayCart(completedCart) {
-    const cartContainer = document.getElementById('cd');
+  const cartContainer = document.getElementById('cd');
+  const cartTotalPrice = document.getElementById('totalPrice');
 
-   
+  // Iterate over each product in the completed cart
+  for (let i = 0; i < completedCart.length; i++) {
+      const product = completedCart[i];
 
-    // Iterate over each product in the completed cart
-    for (let i = 0; i < completedCart.length; i++) {
-        const product = completedCart[i];
+      // Create a container for each product
+      const productContainer = document.createElement('div');
+      productContainer.classList.add('cart__item');
 
-        // Create a container for each product
-        const productContainer = document.createElement('div');
-        productContainer.classList.add('product');
+      const productName = document.createElement('p');
+      productName.textContent = product.name;
 
-        const productName = document.createElement('h3');
-        productName.textContent = product.name;
+      const productPrice = document.createElement('p');
+      productPrice.textContent = `Price: $${product.price}`;
 
-        const productPrice = document.createElement('p');
-        productPrice.textContent = `Price: $${product.price}`;
+      const productImage = document.createElement('img');
+      productImage.src = product.imageUrl;
+      productImage.alt = product.name;
 
-        const productImage = document.createElement('img');
-        productImage.src = product.imageUrl;
-        productImage.alt = product.name;
+      // Set custom image size (change these values as needed)
+      productImage.style.width = '150px';
+      productImage.style.height = '150px';
 
-        // Set custom image size (change these values as needed)
-        productImage.style.width = '150px';
-        productImage.style.height = '150px';
+      // Create a quantity counter
+      const quantityCounter = document.createElement('input');
+      quantityCounter.type = 'number';
+      quantityCounter.value = product.quantity;
+      quantityCounter.min = 1;
+      quantityCounter.addEventListener('input', (event) => {
+          // Update the quantity when the user changes the input
+          product.quantity = parseInt(event.target.value, 1000);
+          
+      });
 
-        const addButton = document.createElement('button');
-        addButton.textContent = 'Add';
-        addButton.classList.add('add-button');
+      // Create a bold text element acting as a "Delete" button
+      const deleteText = document.createElement('strong');
+      deleteText.textContent = 'Delete';
+      deleteText.style.cursor = 'pointer';
+      deleteText.addEventListener('click', () => {
+          // Remove the product from the cart and update the display
+          completedCart.splice(i, 1);
+          updateCartDisplay(completedCart);
+      });
 
-        // Add a click event listener to the "Add" button
-        addButton.addEventListener('click', () => {
-            // Add the product back to the cart and re-render the display
-            const newProduct = { ...product }; // Create a copy of the product
-            completedCart.push(newProduct);
-            
-        });
+      // Append the product elements, quantity counter, and delete text to the container
+      productContainer.appendChild(productImage);
+      productContainer.appendChild(productName);
+      productContainer.appendChild(productPrice);
+      productContainer.appendChild(quantityCounter);
+      productContainer.appendChild(deleteText);
+      cartContainer.appendChild(productContainer);
+  }
 
+  // Calculer le prix total
+  let totalPrice = 0;
+  for (const product of completedCart) {
+      totalPrice += product.individualAmount;
+  }
 
-        // Create a delete button for the product
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.classList.add('delete-button');
+  // Récupérer l'élément existant pour afficher le prix total
+  cartTotalPrice.textContent = `${totalPrice}`;
 
-        // Add a click event listener to the delete button
-        deleteButton.addEventListener('click', () => {
-            // Remove the product from the cart and re-render the display
-            completedCart.splice(i, 1);
-            displayCart(completedCart);
-        });
-
-        // Apply CSS styles
-        productContainer.style.textAlign = 'center';
-        productContainer.style.margin = '10px';
-
-        // Append the product elements and delete button to the container
-        productContainer.appendChild(productImage);
-        productContainer.appendChild(productName);
-        productContainer.appendChild(productPrice);
-        productContainer.appendChild(addButton); // Add the "Add" button
-        productContainer.appendChild(deleteButton);
-        cartContainer.appendChild(productContainer);
-        
-
-        // Calculer le prix total
-     // Calculer le prix total
-     let totalPrice = 0;
-     for (const product of completedCart) {
-         totalPrice += product.individualAmount;
-         // ...
-     }
- 
-     // Récupérer l'élément existant pour afficher le prix total
-     const totalPriceSpan = document.getElementById('totalPrice');
- 
-     // Mettre à jour le contenu de l'élément avec le prix total
-     totalPriceSpan.textContent = `${totalPrice}`;
+  // Sauvegarder le panier dans le stockage local
+  localStorage.setItem('panier', JSON.stringify(completedCart));
 }
-   console.log(completedCart) 
+
+async function main() {
+  let allKanap = await getKanapList();
+  if (!allKanap) {
+      // Handle the case where the API call fails
+      allKanap = [];
+  }
+
+  let completedCart = completeCart(allKanap);
+  if (!completedCart) {
+      // Handle the case where the cart is not properly initialized
+      completedCart = [];
+  }
+
+  displayCart(completedCart);
+
+  const quantityCounters = document.querySelectorAll('input[type="number"]');
+
+  quantityCounters.forEach((counter, index) => {
+    counter.addEventListener('change', (event) => {
+      const newQuantity = parseInt(event.target.value);
+      completedCart[index].quantity = newQuantity;
+      completedCart[index].individualAmount = newQuantity * completedCart[index].price;
+
+      // Mise à jour de l'affichage
+      displayCart(completedCart);
+
+      // Mise à jour du localStorage
+      localStorage.setItem('panier', JSON.stringify(completedCart));
+    });
+  });
+console.log(completedCart) 
+
+
+// Appeler main au chargement de la page
+document.addEventListener('DOMContentLoaded', main);
 }
+
+
 
 //Instauration formulaire avec regex
 function setupFormValidation() {
     // Création des expressions régulières
     
-    // Regular expressions
+    
     const charRegExp = /^[a-zA-Z ,.'-]+$/;
     const addressRegExp = /^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+$/;
     const emailRegExp = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
@@ -239,16 +256,7 @@ function validateAdress(adresse) {
     return true;
   }
 }
-// Génère un numéro aléatoire à 8 chiffres
-function generateRandomNumber() {
-  return Math.floor(Math.random() * 100000000);
-}
 
-// Récupère les informations du panier depuis le stockage local
-function getCartItems() {
-  const panier = JSON.parse(localStorage.getItem('panier')) || [];
-  return panier;
-}
 
 // Calcule le prix total du panier
 function calculateTotalPrice(cartItems) {
@@ -261,18 +269,6 @@ function calculateTotalPrice(cartItems) {
 
 
 
-async function main() {
-  const allKanap = await getKanapList();
-  const completedCart = completeCart(allKanap);
-
-  // Stockez le panier dans le stockage local
-  localStorage.setItem('completedCart', JSON.stringify(completedCart));
-
-  // Redirigez l'utilisateur vers la page de confirmation
-  window.location.href = 'confirmation.html';
 }
 
-
-}
-
-
+//url.search params

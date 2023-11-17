@@ -2,6 +2,8 @@ let kanapId = null
 
 // ---------------------------------------------
 
+
+
 function getKanapId() {
     const searchParams =  new URLSearchParams(location.search)
     return searchParams.get('id')
@@ -62,10 +64,16 @@ function addToBasket ()
         }
 
         let panier = JSON.parse(localStorage.getItem('panier'))
-
+        
         if(panier) {
             const sameArticle = panier.find(p => p.id == kanapId && p.color == choiceProductColor)
-             
+              //fenêtre pop-up
+    const popupConfirmation =() =>{
+        if(window.confirm(`Votre commande de ${choixQuantite} ${article.name} ${choixCouleur} est ajoutée au panier
+Pour consulter votre panier, cliquez sur OK`)){
+            window.location.href ="cart.html";
+        }
+    }
             if(sameArticle) {
                 sameArticle.quantity = sameArticle.quantity + choiceProductQuantity
             } else {
