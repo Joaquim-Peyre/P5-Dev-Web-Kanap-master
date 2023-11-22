@@ -1,140 +1,177 @@
 async function getKanapList() {
-
   return fetch('http://localhost:3000/api/products')
-      .then(function (response) {
-          if (response.ok) {
-              return response.json()
-          }
-      })
-      .then(kanapList => {
-          return kanapList
-      })
+    .then(function (response) {
+      if (response.ok) {
+        return response.json();
+      }
+    })
+    .then(kanapList => {
+      return kanapList;
+    });
 }
 
-function completeCart(allKanap){
-  const panier = JSON.parse(localStorage.getItem('panier'))
-  
-  for(const product of panier) {
-      const correspondingProduct = allKanap.find(k => k._id == product.id)
-      product.name = correspondingProduct.name
-      product.price = correspondingProduct.price
-      product.imageUrl = correspondingProduct.imageUrl
+function completeCart(allKanap) {
+  const panier = JSON.parse(localStorage.getItem('panier'));
 
-      product.individualAmount = product.quantity * product.price;
+  for (const product of panier) {
+    const correspondingProduct = allKanap.find(k => k._id == product.id);
+    product.name = correspondingProduct.name;
+    product.price = correspondingProduct.price;
+    product.imageUrl = correspondingProduct.imageUrl;
+
+    product.individualAmount = product.quantity * product.price;
   }
 
-  
-  return panier
+  return panier;
 }
-
-
-
 
 function displayCart(completedCart) {
   const cartContainer = document.getElementById('cd');
+  cartContainer.innerHTML = ''; // Clear previous content
   const cartTotalPrice = document.getElementById('totalPrice');
+  const totalQuantitySpan = document.getElementById('totalQuantity');
 
-  // Iterate over each product in the completed cart
-  for (let i = 0; i < completedCart.length; i++) {
-      const product = completedCart[i];
 
-      // Create a container for each product
-      const productContainer = document.createElement('div');
-      productContainer.classList.add('cart__item');
+  completedCart.forEach(product => {
+    const article = document.createElement('article');
+    article.classList.add('cart__item');
+    article.setAttribute('data-id', product.id);
+    article.setAttribute('data-color', product.color);
 
-      const productName = document.createElement('p');
-      productName.textContent = product.name;
+    const imgDiv = document.createElement('div');
+    imgDiv.classList.add('cart__item__img');
+    const productImage = document.createElement('img');
+    productImage.src = product.imageUrl;
+    productImage.alt = "Photographie d'un canapé";
+    imgDiv.appendChild(productImage);
+    article.appendChild(imgDiv);
 
-      const productPrice = document.createElement('p');
-      productPrice.textContent = `Price: $${product.price}`;
+    const contentDiv = document.createElement('div');
+    contentDiv.classList.add('cart__item__content');
 
-      const productImage = document.createElement('img');
-      productImage.src = product.imageUrl;
-      productImage.alt = product.name;
+    const contentDescription = document.createElement('div');
+    contentDescription.classList.add('cart__item__content__description');
 
-      // Set custom image size (change these values as needed)
-      productImage.style.width = '150px';
-      productImage.style.height = '150px';
+    const productName = document.createElement('h2');
+    productName.textContent = product.name;
+    const productColor = document.createElement('p');
+    productColor.textContent = product.color;
+    const productPrice = document.createElement('p');
+    productPrice.textContent = `${product.price} €`;
 
-      // Create a quantity counter
-      const quantityCounter = document.createElement('input');
-      quantityCounter.type = 'number';
-      quantityCounter.value = product.quantity;
-      quantityCounter.min = 1;
-      quantityCounter.addEventListener('input', (event) => {
-          // Update the quantity when the user changes the input
-          product.quantity = parseInt(event.target.value, 1000);
-          
-      });
+    contentDescription.appendChild(productName);
+    contentDescription.appendChild(productColor);
+    contentDescription.appendChild(productPrice);
 
-      // Create a bold text element acting as a "Delete" button
-      const deleteText = document.createElement('strong');
-      deleteText.textContent = 'Delete';
-      deleteText.style.cursor = 'pointer';
-      deleteText.addEventListener('click', () => {
-          // Remove the product from the cart and update the display
-          completedCart.splice(i, 1);
-          updateCartDisplay(completedCart);
-      });
+    const contentSettings = document.createElement('div');
+    contentSettings.classList.add('cart__item__content__settings');
 
-      // Append the product elements, quantity counter, and delete text to the container
-      productContainer.appendChild(productImage);
-      productContainer.appendChild(productName);
-      productContainer.appendChild(productPrice);
-      productContainer.appendChild(quantityCounter);
-      productContainer.appendChild(deleteText);
-      cartContainer.appendChild(productContainer);
+    const quantityDiv = document.createElement('div');
+    quantityDiv.classList.add('cart__item__content__settings__quantity');
+
+    const quantityLabel = document.createElement('p');
+    quantityLabel.textContent = 'Qté : ';
+    const quantityInput = document.createElement('input');
+    quantityInput.type = 'number';
+    quantityInput.classList.add('itemQuantity');
+    quantityInput.name = 'itemQuantity';
+    quantityInput.min = 1;
+    quantityInput.max = 100;
+    quantityInput.value = product.quantity;
+
+    quantityInput.addEventListener('input', (event) => {
+      product.quantity = parseInt(event.target.value);
+      product.individualAmount = product.quantity * product.price;
+      displayCart(completedCart);
+      localStorage.setItem('panier', JSON.stringify(completedCart));
+    });
+let totalPrice = 0;
+  let totalQuantity = 0;
+    
+
+  for (const product of completedCart) {
+    totalPrice += product.individualAmount;
+    totalQuantity += product.quantity; // Ajoute la quantité de chaque produit
   }
 
-  // Calculer le prix total
+
+  cartTotalPrice.textContent = `${totalPrice} €`;
+  totalQuantitySpan.textContent = totalQuantity; 
+
+  localStorage.setItem('panier', JSON.stringify(completedCart));
+  
+    quantityDiv.appendChild(quantityLabel);
+    quantityDiv.appendChild(quantityInput);
+
+    const deleteDiv = document.createElement('div');
+    deleteDiv.classList.add('cart__item__content__settings__delete');
+
+    const deleteText = document.createElement('p');
+    deleteText.classList.add('deleteItem');
+    deleteText.textContent = 'Supprimer';
+    deleteText.style.cursor = 'pointer';
+
+    deleteText.addEventListener('click', () => {
+      const index = completedCart.indexOf(product);
+      completedCart.splice(index, 1);
+      displayCart(completedCart);
+      localStorage.setItem('panier', JSON.stringify(completedCart));
+    });
+
+    deleteDiv.appendChild(deleteText);
+
+    contentSettings.appendChild(quantityDiv);
+    contentSettings.appendChild(deleteDiv);
+
+    contentDiv.appendChild(contentDescription);
+    contentDiv.appendChild(contentSettings);
+
+    article.appendChild(contentDiv);
+
+    cartContainer.appendChild(article);
+  });
+
   let totalPrice = 0;
   for (const product of completedCart) {
-      totalPrice += product.individualAmount;
+    totalPrice += product.individualAmount;
   }
 
-  // Récupérer l'élément existant pour afficher le prix total
-  cartTotalPrice.textContent = `${totalPrice}`;
+  cartTotalPrice.textContent = `${totalPrice} €`;
 
-  // Sauvegarder le panier dans le stockage local
   localStorage.setItem('panier', JSON.stringify(completedCart));
 }
 
 async function main() {
   let allKanap = await getKanapList();
   if (!allKanap) {
-      // Handle the case where the API call fails
-      allKanap = [];
+    allKanap = [];
   }
 
   let completedCart = completeCart(allKanap);
   if (!completedCart) {
-      // Handle the case where the cart is not properly initialized
-      completedCart = [];
+    completedCart = [];
   }
 
   displayCart(completedCart);
 
   const quantityCounters = document.querySelectorAll('input[type="number"]');
-
   quantityCounters.forEach((counter, index) => {
     counter.addEventListener('change', (event) => {
       const newQuantity = parseInt(event.target.value);
       completedCart[index].quantity = newQuantity;
       completedCart[index].individualAmount = newQuantity * completedCart[index].price;
-
-      // Mise à jour de l'affichage
       displayCart(completedCart);
-
-      // Mise à jour du localStorage
       localStorage.setItem('panier', JSON.stringify(completedCart));
     });
   });
-console.log(completedCart) 
-
-
-// Appeler main au chargement de la page
-document.addEventListener('DOMContentLoaded', main);
+console.log(completedCart);
 }
+
+
+
+
+
+
 
 
 
