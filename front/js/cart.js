@@ -27,7 +27,7 @@ function completeCart(allKanap) {
 
 function displayCart(completedCart) {
   const cartContainer = document.getElementById('cd');
-  cartContainer.innerHTML = ''; // Clear previous content
+  cartContainer.innerHTML = ''; // Effacer le contenu précédent
   const cartTotalPrice = document.getElementById('totalPrice');
   const totalQuantitySpan = document.getElementById('totalQuantity');
 
@@ -136,7 +136,7 @@ let totalPrice = 0;
     totalPrice += product.individualAmount;
   }
 
-  cartTotalPrice.textContent = `${totalPrice} €`;
+  cartTotalPrice.textContent = `${totalPrice} `;
 
   localStorage.setItem('panier', JSON.stringify(completedCart));
 }
@@ -187,30 +187,50 @@ function setupFormValidation() {
 
     
     const form = document.querySelector(".cart__order__form");
+    const orderForm = document.querySelector('.cart__order__form');
 
-    
+    orderForm.addEventListener('submit',async  function(event) {
+      event.preventDefault();
 
-    // Ecoute des modifications des champs du formulaire
-    form.firstName.addEventListener('change', function() {
-        validateInput(this, charRegExp);
-    });
+      
+      const object  = 
+      { 
+        contact: {
+          firstName: form.firstName.value,
+          lastName: form.lastName.value,
+          address: form.address.value,
+          city: form.city.value,
+          email: form.email.value,
+        } 
+      };
+      console.log(object);
 
-    form.lastName.addEventListener('change', function() {
-        validateInput(this, charRegExp);
-    });
+      const cart = JSON.parse(localStorage.getItem('panier'));
+    const productIds = cart.map(product => product.id);
+    console.log(productIds);
+    object.products = productIds;
 
-    form.address.addEventListener('change', function() {
-        validateInput(this, addressRegExp);
-    });
 
-    form.city.addEventListener('change', function() {
-        validateInput(this, charRegExp);
-    });
+const response = await fetch('http://localhost:3000/api/products/order', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(object),
+      });
+      const data = await response.json();
+      const orderId = data.orderId;
 
-    form.email.addEventListener('change', function() {
-        validateInput(this, emailRegExp);
-    });
 
+      
+
+      window.location.href = `confirmation.html?orderId=${orderId}`;
+      
+    }  
+  
+  )
+
+}
     // Validation d'un champ avec l'expression régulière donnée
     const validateInput = function(inputElement, regex) {
         const errorMsgElement = inputElement.nextElementSibling;
@@ -221,8 +241,8 @@ function setupFormValidation() {
             errorMsgElement.innerHTML = 'Veuillez renseigner ce champ correctement.';
         }
     };
-}
 
+    
 // Appel de la fonction pour la configuration de la validation du formulaire
 setupFormValidation();
 
@@ -308,4 +328,4 @@ function calculateTotalPrice(cartItems) {
 
 }
 
-//url.search params
+
